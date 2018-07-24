@@ -41,19 +41,18 @@ class MyApp extends StatelessWidget{
   Widget build (BuildContext context){
     return new MaterialApp(
       title: "Sng GiveAwayTracker",
-      home: new MyHomePage(title: 'Sng GiveAwayTracker HomePage'),
+      home: new MyHomePage(title: 'SNG GiveAwayTracker HomePage'),
     );
   }
 }
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatelessWidget{
   final String title;
-  var client  =  new http.Client();
+  final client  =  new http.Client();
 
-  MyHomePage({Key key, this.title}) : super (key: key);
+  MyHomePage({Key key, this.title});
 
 
   @override
-  //_MyHomePageState createState() => _MyHomePageState();
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
@@ -62,62 +61,70 @@ class MyHomePage extends StatelessWidget {
       body: FutureBuilder<List<Post>>(
         future: fetchPosts(client),
         builder: (context, snapshot){
-          if (snapshot.hasError) print(snapshot.error);
-          return snapshot.hasData
-              ? PostsList(posts: snapshot.data)
-              : Center(child: CircularProgressIndicator ());
+          if (snapshot.hasError)
+            return new Text('Error: ${snapshot.error}');
+          else
+            return snapshot.hasData ? PostsList(posts: snapshot.data) : Center(child: CircularProgressIndicator ());
         },
       )
     );
   }
 }
 
+
 class PostsList extends StatelessWidget {
+  Future<Null> refreshPosts() async{
+    return null;
+  }
   final List<Post> posts;
 
   PostsList({Key key, this.posts}) : super(key: key);
 
   @override
   Widget build(BuildContext context){
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-      ),
-      itemCount: posts.length,
-      itemBuilder:(context,index){
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            new Text(posts[index].title),
-            new Text(posts[index].postOwner),
-            new Text(posts[index].postLocation),
-          ],
-        );
-      }
+    return RefreshIndicator(
+      onRefresh: refreshPosts,
+      child: ListView.builder(
+            itemCount: posts?.length,
+            itemBuilder:(context,index){
+              return Container(
+                color: Color.fromARGB(255, 201, 203, 202),
+                padding: EdgeInsets.all(10.0),
+                margin: EdgeInsets.all(15.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize:  MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:[
+                          new Text(posts[index].title,
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold
+                            ),
+                          ),
+                          new Text(posts[index].postOwner)
+                        ],
+                      ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.assignment,
+                          size: 35.0,
+                          ),
+                        Text(posts[index].postLocation),
+                        ]
+                        ),
+
+                      ],
+                    ),
+            );
+        }
+    )
     );
   }
 }
-/*
-class _MyHomePageState extends State<MyHomePage> {
-  String _result = "Loading...";
-  int _statusCode = 0;
-
-  @override
-  Widget build(BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("SNG Give Away Tracker"),
-      ),
-      body: new Center(
-        child: new ListView(
-          children: <Widget>[
-            new Text("$_result"),
-            new Text("$_statusCode"),
-          ],
-        )
-      ),
-    );
-  }
-}
-
-*/
