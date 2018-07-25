@@ -2,8 +2,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'posts.dart';
+//
+//TODO: create a firebase database to add the posts that include Giveaway
+//This is done so that i can use FCM(Firebase Cloud Messaging) to send me a notifiction
+//I can extend this so that I can have a feature "On Going Give aways"
+//The On going tab will have a section so that i can input a date and it can let me know when it ends
+//The post will ge gotten from the firebase database
+//
+void main(){
+  runApp(new MyApp());
+}
 
-void main() => runApp(new MyApp());
 
 class MyApp extends StatefulWidget{
   _MyHomePageState createState() => _MyHomePageState();
@@ -17,6 +26,7 @@ class _MyHomePageState extends State<MyApp>{
   void initState() {
     // TODO: implement initState
     super.initState();
+    refreshPosts();
   }
 
   @override
@@ -29,14 +39,14 @@ class _MyHomePageState extends State<MyApp>{
           body: FutureBuilder<List<Post>>(
             future: fetchPosts(client),
             builder: (context, snapshot){
-              if(snapshot.hasError)
-                print("Error: ${snapshot.error}");
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return Center(child: CircularProgressIndicator(),);
+              else if (snapshot.hasData)
+                return displayPosts(snapshot);
               else
-                return snapshot.hasData ? displayPosts(snapshot) : Center(child: CircularProgressIndicator());
+                return Center(child: Text("No Info yet"),);
             },
-
           ),
-
         )
     );
   }
@@ -88,7 +98,6 @@ class _MyHomePageState extends State<MyApp>{
                           Text(_posts[index]?.postLocation),
                         ]
                     ),
-
                   ],
                 ),
               );
@@ -96,6 +105,5 @@ class _MyHomePageState extends State<MyApp>{
         )
     );
   }
-
 }
 
