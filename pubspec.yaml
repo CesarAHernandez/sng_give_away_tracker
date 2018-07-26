@@ -10,7 +10,6 @@ dependencies:
   cupertino_icons: ^0.1.2
   http: "^0.11.3+16"
   firebase_database: ^1.0.3
-  android_alarm_manager: ^0.1.1
   path_provider: ^0.4.1
 
 dev_dependencies:

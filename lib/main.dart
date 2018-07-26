@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:android_alarm_manager/android_alarm_manager.dart';
 
 import 'posts.dart';
 //
@@ -18,11 +15,6 @@ import 'posts.dart';
 //The post will ge gotten from the firebase database
 //
 
-void printHello(){
-final DateTime now = new DateTime.now();
-final int isolateId = Isolate.current.hashCode;
-print("[$now] Hello, world! isolate=${isolateId} function='$printHello'");  
-}
 Future<String> readGoogleInfo() async{
   try{
     String googleInfo = await rootBundle.loadString('config/google_info.json');
@@ -31,48 +23,45 @@ Future<String> readGoogleInfo() async{
     return e.toString();
   }
 }
+
 Future<void> main() async{
   String googleInfoRaw = await readGoogleInfo();
   Map<String,dynamic> googleInfo = json.decode(googleInfoRaw);
-  print(googleInfo['googleAppID']);
-  print(googleInfo['apiKey']);
-  print(googleInfo['databaseURL']);
 
   final FirebaseApp app = await FirebaseApp.configure(
       name: 'postDatabase',
       options: FirebaseOptions (
           googleAppID: googleInfo['googleAppID'],
           apiKey: googleInfo['apiKey'],
-          databaseURL:googleInfo['databaseURL']
+          databaseURL: googleInfo['databaseURL']
       )
   );
   runApp(new MyApp(app:app));
 }
 
-
 class MyApp extends StatefulWidget{
-MyApp({this.app});
-final FirebaseApp app;
-_MyHomePageState createState() => _MyHomePageState();
+  MyApp({this.app});
+  final FirebaseApp app;
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyApp>{
-List<Post> _posts;
-//
-//postToSend is the post that is going to be sent to the database
-//
-Post postToSend;
-DatabaseReference _postRef;
-final client  =  new http.Client();
+  List<Post> _posts;
+  //
+  //postToSend is the post that is going to be sent to the database
+  //
+  Post postToSend;
+  DatabaseReference _postRef;
+  final client  =  new http.Client();
 
 
-@override
-void initState() {
-  // TODO: implement initState
-  super.initState();
-  final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
-  _postRef = database.reference().child('_posts');
-  refreshPosts();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
+    _postRef = database.reference().child('_posts');
+    refreshPosts();
 }
 
 
@@ -106,7 +95,6 @@ Widget build(BuildContext context){
 
 Future<Null> refreshPosts() async{
   List<Post> posts = await fetchPosts(client);
-  await AndroidAlarmManager.periodic(const Duration(seconds: 5),0,printHello);
 
   setState(() {
     _posts = posts;
