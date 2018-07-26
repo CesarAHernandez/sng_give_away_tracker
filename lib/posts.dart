@@ -33,4 +33,15 @@ class Post {
         postLink: json['postlink'] as String
     );
   }
+
+  toJson(){
+    return{
+      'title':title,
+      'postowner':postOwner,
+      'postlocationlink':postLocationLink,
+      'postownerprofilelink':postOwnerProfileLink,
+      'postlocation':postLocation,
+      'postlink':postLink,
+    };
+  }
 }
