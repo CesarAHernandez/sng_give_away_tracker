@@ -85,6 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  firebase_messaging:
+    dependency: "direct main"
+    description:
+      name: firebase_messaging
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.4"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -221,13 +228,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.1"
-  path_provider:
-    dependency: "direct main"
+  platform:
+    dependency: transitive
     description:
-      name: path_provider
+      name: platform
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1"
+    version: "2.1.2"
   plugin:
     dependency: transitive
     description:

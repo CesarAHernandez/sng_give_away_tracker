@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'posts.dart';
 //
@@ -14,7 +15,6 @@ import 'posts.dart';
 //The On going tab will have a section so that i can input a date and it can let me know when it ends
 //The post will ge gotten from the firebase database
 //
-
 Future<String> readGoogleInfo() async{
   try{
     String googleInfo = await rootBundle.loadString('config/google_info.json');
@@ -52,17 +52,46 @@ class _MyHomePageState extends State<MyApp>{
   //
   Post postToSend;
   DatabaseReference _postRef;
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   final client  =  new http.Client();
 
 
+  // void _showPostDialog(Map<String,dynamic> message){
+  //   showDialog<bool>(
+  //     context: context,
+  //     builder: (_) => _buildDialog(context, _itemForMessage(message)),
+  //     ).then((bool shouldNavigate){
+  //       if(shouldNavitage == true){
+  //         _navigateToItemDetail(message);
+  //       }
+
+  //     });
+  // }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
     _postRef = database.reference().child('_posts');
+    _firebaseMessaging.configure(
+      onMessage: (Map<String,dynamic> message){
+        print("onMessage: $message");
+      },
+      onResume: (Map<String,dynamic> message){
+        print("onResume: $message");
+      },
+      onLaunch: (Map<String,dynamic> message){
+        print("onLaunch: $message");
+      },
+    );
+    _firebaseMessaging.getToken().then((String token){
+      assert(token != null);
+      //you can have setstate here 
+      print("Push Messaging token: $token");
+    });
+    _firebaseMessaging.subscribeToTopic("GiveAway");
     refreshPosts();
-}
+  }
 
 
 //This is responsible to submit the post to the database
