@@ -9,11 +9,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'posts.dart';
 //
-//TODO: create a firebase database to add the posts that include Giveaway
-//This is done so that i can use FCM(Firebase Cloud Messaging) to send me a notifiction
-//I can extend this so that I can have a feature "On Going Give aways"
-//The On going tab will have a section so that i can input a date and it can let me know when it ends
-//The post will ge gotten from the firebase database
+// TODO: Make feature -> open a new screen that has all the giveaways and have an options to put 
+// some text next to it so that i can manually put the end date for the giveaway
+// Maybe have it message me when it is almost done
+// I can extend this so that I can have a feature "On Going Give aways"
+// The On going tab will have a section so that i can input a date and it can let me know when it ends
 //
 Future<String> readGoogleInfo() async{
   try{
@@ -25,6 +25,9 @@ Future<String> readGoogleInfo() async{
 }
 
 Future<void> main() async{
+  //
+  // GoogleInfoRaw is the String version of the google info that i want to get
+  //
   String googleInfoRaw = await readGoogleInfo();
   Map<String,dynamic> googleInfo = json.decode(googleInfoRaw);
 
@@ -56,23 +59,16 @@ class _MyHomePageState extends State<MyApp>{
   final client  =  new http.Client();
 
 
-  // void _showPostDialog(Map<String,dynamic> message){
-  //   showDialog<bool>(
-  //     context: context,
-  //     builder: (_) => _buildDialog(context, _itemForMessage(message)),
-  //     ).then((bool shouldNavigate){
-  //       if(shouldNavitage == true){
-  //         _navigateToItemDetail(message);
-  //       }
-
-  //     });
-  // }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
     _postRef = database.reference().child('_posts');
+    //
+    //Configuration for the firebase messaging 
+    //To do what when something happens
+    //
     _firebaseMessaging.configure(
       onMessage: (Map<String,dynamic> message){
         print("onMessage: $message");
@@ -84,20 +80,32 @@ class _MyHomePageState extends State<MyApp>{
         print("onLaunch: $message");
       },
     );
+    // 
+    // Getting the token from the user and then displaying it to the console
+    // If there is no token then the assert fails
+    // 
     _firebaseMessaging.getToken().then((String token){
       assert(token != null);
       //you can have setstate here 
       print("Push Messaging token: $token");
     });
     _firebaseMessaging.subscribeToTopic("GiveAway");
-    refreshPosts();
-  }
+    // 
+    // refreshes the posts when the app initialized, 
+    // I do this so that the state: _post is updated
+    // 
+    // refreshPosts();
 
+  }//initState
 
+// 
 //This is responsible to submit the post to the database
-void handleSubmit(){
+// 
+/*
+void handleSubmit(index){
   _postRef.push().set(_posts[0].toJson());
 }
+*/
 
 
 @override
@@ -121,9 +129,15 @@ Widget build(BuildContext context){
       )
   );
 }
-
+// 
+// Refreshes the posts by recalling fetchPosts when onRefresh is called
+// 
 Future<Null> refreshPosts() async{
   List<Post> posts = await fetchPosts(client);
+    // 
+    // Test subscriptions to the giveaway for a base for testing
+    // This should be dynamic or somthing 
+    // 
 
   setState(() {
     _posts = posts;
@@ -163,12 +177,12 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         IconButton(
+                          onPressed: () => _postRef.push().set(_posts[index].toJson()),
                           icon: Icon(
                                   Icons.assignment,
                                   size: 35.0,
                                 ),
                         ),
-
                         Text(_posts[index]?.postLocation),
                       ]
                   ),
