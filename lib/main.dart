@@ -9,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'posts.dart';
 //
+// TODO: Update the README.md
 // TODO: Make feature -> open a new screen that has all the giveaways and have an options to put 
 // some text next to it so that i can manually put the end date for the giveaway
 // Maybe have it message me when it is almost done
@@ -39,9 +40,22 @@ Future<void> main() async{
           databaseURL: googleInfo['databaseURL']
       )
   );
-  runApp(new MyApp(app:app));
+  runApp(new App(app:app));
 }
+class App extends StatelessWidget{
+  final FirebaseApp app;
+  App({this.app});
 
+  Widget build(BuildContext context){
+    return MaterialApp(
+      routes: <String, WidgetBuilder> {
+        GiveAwayPosts.routeName: (BuildContext context) => new GiveAwayPosts(),
+      },
+      home: new MyApp(app: app,),
+    );
+  }
+
+}
 class MyApp extends StatefulWidget{
   MyApp({this.app});
   final FirebaseApp app;
@@ -110,8 +124,7 @@ void handleSubmit(index){
 
 @override
 Widget build(BuildContext context){
-  return MaterialApp(
-      home: Scaffold(
+  return Scaffold(
         appBar: AppBar(
           title: Text("SNG GiveAwayTracker"),
         ),
@@ -126,8 +139,11 @@ Widget build(BuildContext context){
               return Center(child: Text("No Info yet"),);
           },
         ),
-      )
-  );
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.pushNamed(context,GiveAwayPosts.routeName),
+          child: Icon(Icons.add),
+        ),
+      );
 }
 // 
 // Refreshes the posts by recalling fetchPosts when onRefresh is called
@@ -144,6 +160,7 @@ Future<Null> refreshPosts() async{
   });
   return null;
 }
+
 Widget displayPosts(AsyncSnapshot snapshot) {
   _posts = snapshot.data;
   return RefreshIndicator(
@@ -195,3 +212,28 @@ Widget displayPosts(AsyncSnapshot snapshot) {
 }
 }
 
+// 
+// The second screen will be here
+// 
+class GiveAwayPosts extends StatefulWidget {
+  static const routeName = "/giveawayposts";
+  @override
+  _GiveAwayPostsState createState() => _GiveAwayPostsState();
+}
+
+class _GiveAwayPostsState extends State<GiveAwayPosts> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Give Away Posts")
+      ),
+      body: Center(
+        child: RaisedButton(
+          onPressed: (){Navigator.pop(context);},
+          child: Text("GoBack"),
+        ),
+      ),
+    );
+  }
+}
