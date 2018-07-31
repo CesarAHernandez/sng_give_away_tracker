@@ -32,7 +32,17 @@ class Post {
         title: json['title']as String,
         postLink: json['postlink'] as String
     );
-  }
+    }
+    factory Post.fromSnapshot(Map<dynamic,dynamic> post){
+      return Post(
+          postOwner: post['postowner'] as String,
+          postLocationLink: post['postlocationlink'] as String,
+          postOwnerProfileLink: post['postownerprofilelink'] as String, 
+          postLocation: post['postlocation'] as String,
+          title: post['title']as String,
+          postLink: post['postlink'] as String
+      );
+    }
 
   toJson(){
     return{

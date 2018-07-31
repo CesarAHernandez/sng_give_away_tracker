@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'posts.dart';
+import 'giveawaypostpage.dart';
 //
 // TODO: Update the README.md
 // TODO: Make feature -> open a new screen that has all the giveaways and have an options to put 
@@ -49,7 +50,7 @@ class App extends StatelessWidget{
   Widget build(BuildContext context){
     return MaterialApp(
       routes: <String, WidgetBuilder> {
-        GiveAwayPosts.routeName: (BuildContext context) => new GiveAwayPosts(),
+        GiveAwayPosts.routeName: (BuildContext context) => new GiveAwayPosts(app: app,),
       },
       home: new MyApp(app: app,),
     );
@@ -64,18 +65,12 @@ class MyApp extends StatefulWidget{
 
 class _MyHomePageState extends State<MyApp>{
   List<Post> _posts;
-  //
-  //postToSend is the post that is going to be sent to the database
-  //
-  Post postToSend;
   DatabaseReference _postRef;
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   final client  =  new http.Client();
 
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
     _postRef = database.reference().child('_posts');
@@ -126,6 +121,12 @@ void handleSubmit(index){
 Widget build(BuildContext context){
   return Scaffold(
         appBar: AppBar(
+          actions: <Widget>[
+            IconButton(
+              onPressed: () => Navigator.pushNamed(context,GiveAwayPosts.routeName),
+              icon: Icon(Icons.arrow_right),
+              )
+          ],
           title: Text("SNG GiveAwayTracker"),
         ),
         body: FutureBuilder<List<Post>>(
@@ -138,10 +139,6 @@ Widget build(BuildContext context){
             else
               return Center(child: Text("No Info yet"),);
           },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context,GiveAwayPosts.routeName),
-          child: Icon(Icons.add),
         ),
       );
 }
@@ -210,30 +207,4 @@ Widget displayPosts(AsyncSnapshot snapshot) {
       )
   );
 }
-}
-
-// 
-// The second screen will be here
-// 
-class GiveAwayPosts extends StatefulWidget {
-  static const routeName = "/giveawayposts";
-  @override
-  _GiveAwayPostsState createState() => _GiveAwayPostsState();
-}
-
-class _GiveAwayPostsState extends State<GiveAwayPosts> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Give Away Posts")
-      ),
-      body: Center(
-        child: RaisedButton(
-          onPressed: (){Navigator.pop(context);},
-          child: Text("GoBack"),
-        ),
-      ),
-    );
-  }
 }
