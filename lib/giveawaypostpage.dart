@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'posts.dart';
 
@@ -117,7 +118,9 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             IconButton(
-                              onPressed: () => _postRef.push().set(_posts[index].toJson()),
+                              onPressed: () async => await canLaunch(_posts[index]?.postLink)
+                                  ? await launch(_posts[index]?.postLink)
+                                  : throw "Could not launch URL",
                               icon: Icon(
                                       Icons.assignment,
                                       size: 35.0,

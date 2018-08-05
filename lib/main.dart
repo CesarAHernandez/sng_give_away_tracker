@@ -6,16 +6,14 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'posts.dart';
+import 'drawer.dart';
 import 'giveawaypostpage.dart';
 //
 // TODO: Update the README.md
-// TODO: Make feature -> open a new screen that has all the giveaways and have an options to put 
-// some text next to it so that i can manually put the end date for the giveaway
-// Maybe have it message me when it is almost done
-// I can extend this so that I can have a feature "On Going Give aways"
-// The On going tab will have a section so that i can input a date and it can let me know when it ends
+// TODO : Feature when i tap on a post it would take me to the website on the url
 //
 Future<String> readGoogleInfo() async{
   try{
@@ -120,13 +118,8 @@ void handleSubmit(index){
 @override
 Widget build(BuildContext context){
   return Scaffold(
+        drawer: createDrawer(),
         appBar: AppBar(
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => Navigator.pushNamed(context,GiveAwayPosts.routeName),
-              icon: Icon(Icons.arrow_right),
-              )
-          ],
           title: Text("SNG GiveAwayTracker"),
         ),
         body: FutureBuilder<List<Post>>(
@@ -191,7 +184,11 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         IconButton(
-                          onPressed: () => _postRef.push().set(_posts[index].toJson()),
+                          // Checks to see if the url can be launch if it can it will 
+                          // Otherwise it will throw
+                          onPressed: () async => await canLaunch(_posts[index]?.postLink)
+                              ? await launch(_posts[index]?.postLink)
+                              : throw "Could not launch URL",
                           icon: Icon(
                                   Icons.assignment,
                                   size: 35.0,
