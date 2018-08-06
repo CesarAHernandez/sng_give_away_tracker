@@ -65,15 +65,12 @@ class MyApp extends StatefulWidget{
 
 class _MyHomePageState extends State<MyApp>{
   List<Post> _posts;
-  DatabaseReference _postRef;
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   final client  =  new http.Client();
 
   @override
   void initState() {
     super.initState();
-    final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
-    _postRef = database.reference().child('_posts');
     //
     //Configuration for the firebase messaging 
     //To do what when something happens
@@ -190,13 +187,10 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        IconButton(
-                          onPressed: () => _postRef.push().set(_posts[index].toJson()),
-                          icon: Icon(
-                                  Icons.assignment,
-                                  size: 35.0,
-                                ),
-                        ),
+                          Icon(
+                            Icons.assignment,
+                            size: 35.0,
+                            ),
                         Text(_posts[index]?.postLocation),
                       ]
                   ),

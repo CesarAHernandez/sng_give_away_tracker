@@ -33,7 +33,6 @@ class GiveAwayPosts extends StatefulWidget {
 
 class _GiveAwayPostsState extends State<GiveAwayPosts> {
     List<Post> _posts = new List<Post>();
-    DatabaseReference _postRef;
     
     @override
     void initState() {
@@ -92,7 +91,7 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
               itemCount: _posts?.length,
               itemBuilder:(context,index){
                 return Container(
-                  color: Color.fromARGB(255, 201, 203, 202),
+                  color: Color.fromARGB(255, 176, 224, 230),
                   padding: EdgeInsets.all(10.0),
                   margin: EdgeInsets.all(15.0),
                   child: Row(
@@ -116,13 +115,6 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            IconButton(
-                              onPressed: () => _postRef.push().set(_posts[index].toJson()),
-                              icon: Icon(
-                                      Icons.assignment,
-                                      size: 35.0,
-                                    ),
-                            ),
                             Text(_posts[index]?.postLocation),
                           ]
                       ),
