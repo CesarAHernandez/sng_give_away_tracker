@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 import 'posts.dart';
 
@@ -16,6 +16,7 @@ class GiveAwayPosts extends StatefulWidget {
 
 class _GiveAwayPostsState extends State<GiveAwayPosts> {
     List<Post> _posts = new List<Post>();
+    final flutterWebviewPlugin = new FlutterWebviewPlugin();
     
     @override
     void initState() {
@@ -99,9 +100,28 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             IconButton(
-                              onPressed: () async => await canLaunch(_posts[index]?.postLink)
-                                  ? await launch(_posts[index]?.postLink)
-                                  : throw "Could not launch URL",
+                              onPressed: () async{
+                            Navigator.push(context, new MaterialPageRoute(
+                                            builder: (_) => new WebviewScaffold(
+                                                url: _posts[index]?.postLink,
+                                                withLocalUrl: true,
+                                                scrollBar: true,
+                                                appBar: new AppBar(
+                                                  title: new Text(_posts[index]?.title),
+                                                  actions: <Widget>[
+                                                      new IconButton(
+                                                        icon: new Icon(Icons.refresh),
+                                                        tooltip: 'Refresh',
+                                                        onPressed: () {
+                                                          flutterWebviewPlugin.reload();
+                                                        },
+                                                      ),
+                                                    ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }, 
                               icon: Icon(
                                       Icons.assignment,
                                       size: 35.0,

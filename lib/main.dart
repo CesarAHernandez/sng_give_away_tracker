@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 import 'posts.dart';
 import 'drawer.dart';
@@ -19,7 +18,7 @@ Future<String> readGoogleInfo() async{
     String googleInfo = await rootBundle.loadString('config/google_info.json');
     return googleInfo;
   }catch (e) {
-    return e.toString();
+    print(e.toString());
   }
 }
 
@@ -63,6 +62,13 @@ class MyApp extends StatefulWidget{
 class _MyHomePageState extends State<MyApp>{
   List<Post> _posts;
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+  final flutterWebviewPlugin = new FlutterWebviewPlugin();
+  StreamSubscription _onDestroy;
+  StreamSubscription _onScrollYChanged;
+  StreamSubscription<WebViewStateChanged> _onStateChanged;
+  double oldYPos;
+  StreamSubscription<String> _onUrlChanged;
+  final _scaffoldKey = new GlobalKey<ScaffoldState>();
   // final client  =  new http.Client();
 
   @override
@@ -93,14 +99,37 @@ class _MyHomePageState extends State<MyApp>{
       print("Push Messaging token: $token");
     });
     _firebaseMessaging.subscribeToTopic("GiveAway");
-    // 
-    // refreshes the posts when the app initialized, 
-    // I do this so that the state: _post is updated
-    // 
-    // refreshPosts();
 
+    _onDestroy = flutterWebviewPlugin.onDestroy.listen((_) {
+      print("This webpage was destroyed");
+    });
+    _onStateChanged = flutterWebviewPlugin.onStateChanged.listen((WebViewStateChanged state){
+      print('onStateChanged: ${state.type} ${state.url}');
+    });
+    _onScrollYChanged =
+        flutterWebviewPlugin.onScrollYChanged.listen((double x) async{ 
+          if(mounted){
+            print('oldPos: ${oldYPos} -> ${x}');
+            await Future.delayed(Duration(milliseconds: 1000));
+            setState(() {
+              oldYPos = x;
+            });
+              if(oldYPos > 0 && x == 0){
+                flutterWebviewPlugin.reload();
+              }
+          }
+
+    });
+
+
+    void dispose(){
+      _onScrollYChanged.cancel();
+      _onUrlChanged.cancel();
+      _onDestroy.cancel();
+      flutterWebviewPlugin.dispose();
+      super.dispose();
+    }
   }//initState
-
 // 
 //This is responsible to submit the post to the database
 // 
@@ -145,7 +174,6 @@ Future<Null> refreshPosts() async{
   });
   return null;
 }
-
 Widget displayPosts(AsyncSnapshot snapshot) {
   _posts = snapshot.data;
   return RefreshIndicator(
@@ -172,7 +200,7 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                         ),
                         new Text(_posts[index]?.postOwner)
                       ],
-                    ),
+                   ),
                   ),
                   Column(
                       mainAxisSize: MainAxisSize.min,
@@ -181,13 +209,36 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                         IconButton(
                           // Checks to see if the url can be launch if it can it will 
                           // Otherwise it will throw
-                          onPressed: () async => await canLaunch(_posts[index]?.postLink)
-                              ? await launch(_posts[index]?.postLink)
-                              : throw "Could not launch URL",
-                          icon: Icon(
-                                  Icons.assignment,
-                                  size: 35.0,
-                                ),
+                          // onPressed: () async => await canLaunch(_posts[index]?.postLink)
+                          //     ? await launch(_posts[index]?.postLink)
+                          //     : throw "Could not launch URL",
+                          onPressed: () async{
+                            Navigator.push(context, new MaterialPageRoute(
+                                            builder: (_) => new WebviewScaffold(
+                                                url: _posts[index]?.postLink,
+                                                withLocalUrl: true,
+                                                scrollBar: true,
+                                                appBar: new AppBar(
+                                                  title: new Text(_posts[index]?.title),
+                                                  actions: <Widget>[
+                                                      new IconButton(
+                                                        icon: new Icon(Icons.refresh),
+                                                        tooltip: 'Refresh',
+                                                        onPressed: () {
+                                                          flutterWebviewPlugin.reload();
+                                                        },
+                                                      ),
+                                                    ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }, 
+                              // onPressed: () => Navigator.of(context).pushNamed('/webView'),
+                            icon: Icon(
+                                Icons.assignment,
+                                size: 35.0,
+                              ),
                         ),
                         Text(_posts[index]?.postLocation),
                       ]
@@ -199,4 +250,6 @@ Widget displayPosts(AsyncSnapshot snapshot) {
       )
   );
 }
+
 }
+
