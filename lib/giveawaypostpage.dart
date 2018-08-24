@@ -1,27 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'posts.dart';
 
-class FirebasePosts {
-  static Future<List<Post>> getPosts() async{
-    List<Post> posts = new List<Post>();
-    Completer<List<Post>> completer = new Completer<List<Post>>();
-    FirebaseDatabase.instance
-        .reference()
-        .child("_posts")
-        .once()
-        .then((DataSnapshot snapshot){
-          for ( var value in snapshot.value.values){
-            posts.add(Post.fromSnapshot(value));
-          }
-         completer.complete(posts);
-        });
-    return completer.future;
-  }
-}
 class GiveAwayPosts extends StatefulWidget {
   static const routeName = "/giveawayposts";
   final FirebaseApp app;
@@ -52,7 +35,7 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
         ),
         body: FutureBuilder<List<Post>>(
           // stream : FirebaseDatabase.instance.reference().child("_posts").onValue,
-          future: FirebasePosts.getPosts(),
+          future: Post.getGiveAwayPosts(),
           builder: (context, snapshot){
             if (snapshot.connectionState == ConnectionState.waiting)
               return Center(child: CircularProgressIndicator(),);
@@ -66,7 +49,7 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
     }
 
     Future<Null> refreshGiveAwayPost() async {
-      List<Post> posts = await FirebasePosts.getPosts();
+      List<Post> posts = await Post.getGiveAwayPosts();
 
       setState(() {
         _posts = posts;
@@ -115,6 +98,15 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
+                            IconButton(
+                              onPressed: () async => await canLaunch(_posts[index]?.postLink)
+                                  ? await launch(_posts[index]?.postLink)
+                                  : throw "Could not launch URL",
+                              icon: Icon(
+                                      Icons.assignment,
+                                      size: 35.0,
+                                    ),
+                            ),
                             Text(_posts[index]?.postLocation),
                           ]
                       ),

@@ -1,8 +1,8 @@
+/*
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-
 Future<List<Post>> fetchPosts(http.Client client) async{
 
   final response = await client.get('http://192.168.1.226/posts.json');
@@ -15,6 +15,10 @@ List<Post> parsePosts(String responseBody){
 
   return parsed.map<Post>((json) => Post.fromJson(json)).toList();
 }
+*/
+
+import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
 
 class Post {
   final String postOwner, postLocationLink, postOwnerProfileLink, postLocation,
@@ -43,6 +47,36 @@ class Post {
           postLink: post['postlink'] as String
       );
     }
+  static Future<List<Post>> getGiveAwayPosts() async{
+    List<Post> posts = new List<Post>();
+    Completer<List<Post>> completer = new Completer<List<Post>>();
+    FirebaseDatabase.instance
+        .reference()
+        .child("_posts")
+        .once()
+        .then((DataSnapshot snapshot){
+          for ( var value in snapshot.value.values){
+            posts.add(Post.fromSnapshot(value));
+          }
+         completer.complete(posts);
+        });
+    return completer.future;
+  }
+  
+  static Future<List<Post>> getFrontPagePosts() async{
+    List<Post> posts = new List<Post>();
+    Completer<List<Post>> completer = new Completer<List<Post>>();
+    FirebaseDatabase.instance
+        .reference()
+        .child("frontPagePosts")
+        .once()
+        .then((DataSnapshot snapshot){
+          for (var value in snapshot.value.values)
+            posts.add(Post.fromSnapshot(value));
+          completer.complete(posts);
+        });
+      return completer.future;
+  }
 
   toJson(){
     return{

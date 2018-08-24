@@ -2,20 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'posts.dart';
+import 'drawer.dart';
 import 'giveawaypostpage.dart';
 //
 // TODO: Update the README.md
-// TODO: Make feature -> open a new screen that has all the giveaways and have an options to put 
-// some text next to it so that i can manually put the end date for the giveaway
-// Maybe have it message me when it is almost done
-// I can extend this so that I can have a feature "On Going Give aways"
-// The On going tab will have a section so that i can input a date and it can let me know when it ends
+// TODO : Feature when i tap on a post it would take me to the website on the url
 //
 Future<String> readGoogleInfo() async{
   try{
@@ -66,7 +63,7 @@ class MyApp extends StatefulWidget{
 class _MyHomePageState extends State<MyApp>{
   List<Post> _posts;
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-  final client  =  new http.Client();
+  // final client  =  new http.Client();
 
   @override
   void initState() {
@@ -113,21 +110,15 @@ void handleSubmit(index){
 }
 */
 
-
 @override
 Widget build(BuildContext context){
   return Scaffold(
+        drawer: CreateDrawer(),
         appBar: AppBar(
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => Navigator.pushNamed(context,GiveAwayPosts.routeName),
-              icon: Icon(Icons.arrow_right),
-              )
-          ],
           title: Text("SNG GiveAwayTracker"),
         ),
         body: FutureBuilder<List<Post>>(
-          future: fetchPosts(client),
+          future: Post.getFrontPagePosts(),
           builder: (context, snapshot){
             if (snapshot.connectionState == ConnectionState.waiting)
               return Center(child: CircularProgressIndicator(),);
@@ -143,7 +134,7 @@ Widget build(BuildContext context){
 // Refreshes the posts by recalling fetchPosts when onRefresh is called
 // 
 Future<Null> refreshPosts() async{
-  List<Post> posts = await fetchPosts(client);
+  List<Post> posts = await Post.getFrontPagePosts();
     // 
     // Test subscriptions to the giveaway for a base for testing
     // This should be dynamic or somthing 
@@ -187,10 +178,17 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                          Icon(
-                            Icons.assignment,
-                            size: 35.0,
-                            ),
+                        IconButton(
+                          // Checks to see if the url can be launch if it can it will 
+                          // Otherwise it will throw
+                          onPressed: () async => await canLaunch(_posts[index]?.postLink)
+                              ? await launch(_posts[index]?.postLink)
+                              : throw "Could not launch URL",
+                          icon: Icon(
+                                  Icons.assignment,
+                                  size: 35.0,
+                                ),
+                        ),
                         Text(_posts[index]?.postLocation),
                       ]
                   ),
