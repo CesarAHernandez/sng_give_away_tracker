@@ -2,8 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'posts.dart';
+
+// TODO: implement different filters(timestamp,post location,)
+// TODO: search bar 
 
 class GiveAwayPosts extends StatefulWidget {
   static const routeName = "/giveawayposts";
@@ -32,7 +36,8 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
     Widget build(BuildContext context) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("Give Away Posts")
+          title: Text("Give Away Posts"),
+          
         ),
         body: FutureBuilder<List<Post>>(
           // stream : FirebaseDatabase.instance.reference().child("_posts").onValue,
@@ -48,6 +53,9 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
           ),
       );
     }
+    showFilters(){
+
+    }
 
     Future<Null> refreshGiveAwayPost() async {
       List<Post> posts = await Post.getGiveAwayPosts();
@@ -60,14 +68,9 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
     }
 
     Widget _giveAwayPosts(AsyncSnapshot snapshot){
-      /*
-      Map<dynamic,dynamic> map = snapshot.data.snapshot.value;
-        for (var value in map.values.toList()){
-          _posts.add(Post.fromSnapshot(value));
-        }
-        */
-      // Post.fromSnapshot(snapshot.data.snapshot.value);
       _posts = snapshot.data;
+      // _posts = Post.organizePosts(_posts, 'timestamp');
+      // _posts = Post.filterLocation(_posts,'declined'); 
 
       return RefreshIndicator(
           onRefresh: refreshGiveAwayPost,
@@ -101,26 +104,27 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
                           children: [
                             IconButton(
                               onPressed: () async{
-                            Navigator.push(context, new MaterialPageRoute(
-                                            builder: (_) => new WebviewScaffold(
-                                                url: _posts[index]?.postLink,
-                                                withLocalUrl: true,
-                                                scrollBar: true,
-                                                appBar: new AppBar(
-                                                  title: new Text(_posts[index]?.title),
-                                                  actions: <Widget>[
-                                                      new IconButton(
-                                                        icon: new Icon(Icons.refresh),
-                                                        tooltip: 'Refresh',
-                                                        onPressed: () {
-                                                          flutterWebviewPlugin.reload();
-                                                        },
-                                                      ),
-                                                    ],
+                                Navigator.push(context, new MaterialPageRoute(
+                                                builder: (_) => new WebviewScaffold(
+                                                    url: _posts[index]?.postLink,
+                                                    withLocalUrl: true,
+                                                    scrollBar: true,
+                                                    appBar: new AppBar(
+                                                      title: new Text(_posts[index]?.title),
+                                                      actions: <Widget>[
+                                                          new IconButton(
+                                                            icon: new Icon(Icons.refresh),
+                                                            tooltip: 'Refresh',
+                                                            onPressed: () {
+                                                              flutterWebviewPlugin.reload();
+                                                            },
+                                                          ),
+                                                        ],
+                                                    ),
+                                                  ),
                                                 ),
-                                              ),
-                                            ),
                                           );
+
                                         }, 
                               icon: Icon(
                                       Icons.assignment,
@@ -128,6 +132,7 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
                                     ),
                             ),
                             Text(_posts[index]?.postLocation),
+                            _posts[index]?.timeStamp != null ? Text(_posts[index]?.timeStamp) : Text("Something went wrong"),
                           ]
                       ),
                     ],
