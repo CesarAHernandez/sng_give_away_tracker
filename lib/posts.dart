@@ -94,10 +94,10 @@ class Post {
   static List<Post> organizePosts(List<Post> posts, String filter){
     // TODO: Having different filters like ('abc',timestamp)
     switch (filter){
-      case 'alphabeticalAsc':
+      case 'oldtonew':
         try{
           posts.sort((a, b){
-            return a.title.toLowerCase().compareTo(b.title.toLowerCase()); 
+            return a.timeStamp.toLowerCase().compareTo(b.timeStamp.toLowerCase()); 
           });
           return posts;
 
@@ -107,7 +107,7 @@ class Post {
         }
         break;
 
-      case 'timestamp':
+      case 'newtoold':
         try{
           print("using timestapm filter");
           posts.sort((a, b){
@@ -127,15 +127,31 @@ class Post {
 
     }
   }
-  static List<Post> filterLocation(List<Post> list,String filter){
+  static List<Post> categoryFilter(List<Post> list,String filter){
     List<Post> filteredList = new List<Post>();
-     if(filter.length == 0){
+     if(filter.length == 0 || filter == 'none'){
        return list;
      }else{
-       filteredList = list.where((i) => i.postLocation.toLowerCase() == '${filter}').toList();
+       filteredList = list.where((i) => i.postLocation.toLowerCase()=='${filter.toLowerCase()}').toList();
        if (filteredList.length == 0 ){
          // Make a toast that tells the user that the filter has no results
-         return list;
+         return [];
+       }else{
+         return filteredList;
+       }
+     }
+
+  }
+  static List<Post> searchFilter(List<Post> list,String filter){
+    List<Post> filteredList = new List<Post>();
+     if(filter.length == 0 || filter == 'none'){
+       return list;
+     }else{
+       filteredList = list.where((i) => i.title.toLowerCase()
+       .contains('${filter.toLowerCase()}')).toList();
+       if (filteredList.length == 0 ){
+         // Make a toast that tells the user that the filter has no results
+         return [];
        }else{
          return filteredList;
        }

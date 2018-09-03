@@ -106,21 +106,6 @@ class _MyHomePageState extends State<MyApp>{
     _onStateChanged = flutterWebviewPlugin.onStateChanged.listen((WebViewStateChanged state){
       print('onStateChanged: ${state.type} ${state.url}');
     });
-    _onScrollYChanged =
-        flutterWebviewPlugin.onScrollYChanged.listen((double x) async{ 
-          if(mounted){
-            print('oldPos: ${oldYPos} -> ${x}');
-            await Future.delayed(Duration(milliseconds: 1000));
-            setState(() {
-              oldYPos = x;
-            });
-              if(oldYPos > 0 && x == 0){
-                flutterWebviewPlugin.reload();
-              }
-          }
-
-    });
-
 
     void dispose(){
       _onScrollYChanged.cancel();
