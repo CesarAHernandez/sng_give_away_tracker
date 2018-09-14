@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
@@ -25,30 +26,20 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
     String _ordering = 'none';
     String _searchValue = '';
     SearchBar searchBar;
+
     @override
     void initState() {
-      // TODO: implement initState
-
-      // final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
-      // FirebasePosts.getPostStream(_updatePosts).then((StreamSubscription s)=> _subscriptionPost = s);
-      // FirebasePosts.getPosts().then(_updatePosts);
-      // 
       super.initState();
     }
+
     void submittedValue(String value){
-      setState(() {
-         _searchValue = value;
-        //  _scaffoldKey.currentState.showSnackBar(new SnackBar( content: new Text("You wrote $value")));
-      });
+      setState( () => _searchValue = value );
     }
     void searchChangedValue(String value){
-      setState(() {
-        _searchValue = value;
-      });
+      setState( () => _searchValue = value );
     }
     AppBar buildAppBar(BuildContext context){
       return new AppBar(
-          // title: filters(),
           flexibleSpace: new Container(
               margin: const EdgeInsets.fromLTRB(0.0, 20.0, 30.0, 0.0),
               height: 100.0,
@@ -62,16 +53,6 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
           actions: [
             filters(),
             ordering(),
-            /*
-            new Container(
-              margin: const EdgeInsets.fromLTRB(0.0, 20.0, 30.0, 0.0),
-              width: 47.0,
-              child: Text('$_searchValue',
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                ),
-            ),
-            */
             searchBar.getSearchAction(context)
             ],
       );
@@ -173,10 +154,79 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
 
       return null; 
     }
+    String composeTimeStamp(String postTime){
+      String parsedTime;
+      String month, day, hour, minute;
+      DateTime timeStamp = DateTime.parse(postTime);
+      // If the time is less than 10 it would give it a leading 0
+      // from 9 -> 09
+      if (timeStamp.day.toString().length == 1){
+        day = '0${timeStamp.day}';
+      }else{
+        day = timeStamp.day.toString();
+      }
+
+      if (timeStamp.hour.toString().length == 1){
+        hour = '0${timeStamp.hour}';
+      }else{
+        hour = timeStamp.hour.toString();
+      }
+      
+      if (timeStamp.minute.toString().length == 1){
+        minute = '0${timeStamp.minute}';
+      }else{
+        minute = timeStamp.minute.toString();
+      }
+
+      switch(timeStamp.month.toString()){
+        case '1':
+          month = 'January';
+          break;
+        case '2':
+          month = 'Februrary';
+          break;
+        case '3':
+          month = 'March';
+          break;
+        case '4':
+          month = 'April';
+          break;
+        case '5':
+          month = 'May';
+          break;
+        case '6':
+          month = 'June';
+          break;
+        case '7':
+          month = 'July';
+          break;
+        case '8':
+          month = 'August';
+          break;
+        case '9':
+          month = 'September';
+          break;
+        case '10':
+          month = 'October';
+          break;
+        case '11':
+          month = 'November';
+          break;
+        case '12':
+          month = 'December';
+          break;
+        default:
+          month = timeStamp.month.toString();
+          break;
+      }
+
+      parsedTime = '$month $day, ${timeStamp.year.toString()} at $hour:$minute';
+      return parsedTime;
+    }
 
     Widget _giveAwayPosts(AsyncSnapshot snapshot){
       _posts = snapshot.data;
-      // _posts = Post.organizePosts(_posts, 'timestamp');
+     
       if(_searchValue != ''){
         _posts = Post.searchFilter(_posts, _searchValue);
       }
@@ -242,14 +292,14 @@ class _GiveAwayPostsState extends State<GiveAwayPosts> {
 
                                         }, 
                               icon: Icon(
-                                      Icons.assignment,
+                                      Icons.web,
                                       size: 35.0,
                                     ),
                             ),
                             Text(_posts[index]?.postLocation),
-                            _posts[index]?.timeStamp != null ? Text(_posts[index]?.timeStamp) : Text("Something went wrong"),
+                            _posts[index]?.timeStamp != '0' ? Text(composeTimeStamp(_posts[index]?.timeStamp)) : Text("Post Deleted"),
                           ]
-                      ),
+                      )
                     ],
                   ),
                 );

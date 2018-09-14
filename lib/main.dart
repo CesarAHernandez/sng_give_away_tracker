@@ -13,16 +13,17 @@ import 'giveawaypostpage.dart';
 // TODO: Update the README.md
 // TODO : Feature when i tap on a post it would take me to the website on the url
 //
-Future<String> readGoogleInfo() async{
+Future<String> readGoogleInfo() async {
   try{
     String googleInfo = await rootBundle.loadString('config/google_info.json');
     return googleInfo;
   }catch (e) {
     print(e.toString());
+    return null;
   }
 }
 
-Future<void> main() async{
+main() async{
   //
   // GoogleInfoRaw is the String version of the google info that i want to get
   //
@@ -221,7 +222,7 @@ Widget displayPosts(AsyncSnapshot snapshot) {
                                         }, 
                               // onPressed: () => Navigator.of(context).pushNamed('/webView'),
                             icon: Icon(
-                                Icons.assignment,
+                                Icons.web,
                                 size: 35.0,
                               ),
                         ),
